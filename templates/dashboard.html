@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mejoramiso® Admin</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-primary { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
+        .gradient-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .gradient-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .gradient-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+        
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" v-cloak>
+        <!-- Header -->
+        <header class="gradient-primary text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <img src="https://web.mejoramiso.com/wp-content/uploads/2024/04/LOGO-MEJORAMISO-1.jpg" 
+                             alt="Mejoramiso" 
+                             class="h-10 bg-white rounded px-2">
+                        <div>
+                            <h1 class="text-xl font-bold">Dashboard Administrativo</h1>
+                            <p class="text-sm text-blue-100">Panel de Control Mejoramiso®</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="cargarDatos" 
+                                class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                            <i class="fas fa-sync-alt" :class="{'fa-spin': cargando}"></i>
+                            <span>Actualizar</span>
+                        </button>
+                        <a href="/" 
+                           class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                            <i class="fas fa-comments"></i>
+                            <span>Chatbot</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container mx-auto px-4 py-6">
+            <!-- Estadísticas Principales -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Total Tickets -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 animate-slide-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold uppercase">Total Tickets</p>
+                            <p class="text-3xl font-bold text-gray-800 mt-2" v-text="stats.totalTickets"></p>
+                            <p class="text-xs text-gray-400 mt-1">Todos los tiempos</p>
+                        </div>
+                        <div class="w-16 h-16 gradient-primary rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-ticket-alt text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tickets Pendientes -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500 animate-slide-in" style="animation-delay: 0.1s">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold uppercase">Pendientes</p>
+                            <p class="text-3xl font-bold text-yellow-600 mt-2" v-text="stats.ticketsPendientes"></p>
+                            <p class="text-xs text-gray-400 mt-1">Requieren atención</p>
+                        </div>
+                        <div class="w-16 h-16 gradient-warning rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-clock text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demos Pendientes -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 animate-slide-in" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold uppercase">Demos Solicitadas</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2" v-text="stats.demosPendientes"></p>
+                            <p class="text-xs text-gray-400 mt-1">Oportunidades comerciales</p>
+                        </div>
+                        <div class="w-16 h-16 gradient-success rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-calendar-check text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversaciones Hoy -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 animate-slide-in" style="animation-delay: 0.3s">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold uppercase">Conversaciones Hoy</p>
+                            <p class="text-3xl font-bold text-purple-600 mt-2" v-text="stats.conversacionesHoy"></p>
+                            <p class="text-xs text-gray-400 mt-1">Interacciones del día</p>
+                        </div>
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-comments text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl shadow-lg mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                        <template v-for="tab in tabs" :key="tab.id">
+                            <button @click="tabActivo = tab.id"
+                                    :class="tabActivo === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                    class="py-4 px-1 border-b-2 font-semibold text-sm transition flex items-center space-x-2">
+                                <i :class="tab.icon"></i>
+                                <span v-text="tab.nombre"></span>
+                                <span v-if="tab.badge" 
+                                      class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-2"
+                                      v-text="tab.badge">
+                                </span>
+                            </button>
+                        </template>
+                    </nav>
+                </div>
+
+                <!-- Contenido Tabs -->
+                <div class="p-6">
+                    <!-- Tab Tickets -->
+                    <div v-show="tabActivo === 'tickets'" class="animate-slide-in">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Tickets de Soporte</h2>
+                            <div class="flex space-x-3">
+                                <select v-model="filtroTickets" 
+                                        class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="todos">Todos</option>
+                                    <option value="pendiente">Pendientes</option>
+                                    <option value="en_proceso">En Proceso</option>
+                                    <option value="resuelto">Resueltos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div v-if="ticketsFiltrados.length === 0" 
+                             class="text-center py-12 text-gray-400">
+                            <i class="fas fa-inbox text-6xl mb-4"></i>
+                            <p class="text-xl">No hay tickets</p>
+                        </div>
+
+                        <div v-else class="space-y-4">
+                            <template v-for="ticket in ticketsFiltrados" :key="ticket.id">
+                                <div class="bg-gray-50 rounded-lg p-5 hover:shadow-md transition border border-gray-200">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-3 mb-2">
+                                                <span class="text-sm font-bold text-gray-500">#<span v-text="ticket.id"></span></span>
+                                                <span :class="getBadgeClass(ticket.prioridad)"
+                                                      class="px-3 py-1 rounded-full text-xs font-semibold"
+                                                      v-text="ticket.prioridad.toUpperCase()">
+                                                </span>
+                                                <span :class="getEstadoBadgeClass(ticket.estado)"
+                                                      class="px-3 py-1 rounded-full text-xs font-semibold"
+                                                      v-text="formatearEstado(ticket.estado)">
+                                                </span>
+                                            </div>
+                                            <h3 class="text-lg font-bold text-gray-800" v-text="ticket.asunto"></h3>
+                                            <p class="text-sm text-gray-600 mt-1" v-text="ticket.descripcion"></p>
+                                        </div>
+                                        <div class="text-right text-sm text-gray-500">
+                                            <i class="far fa-calendar mr-1"></i>
+                                            <span v-text="formatearFecha(ticket.created_at)"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid md:grid-cols-3 gap-3 mb-4 text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-user text-gray-400"></i>
+                                            <span class="text-gray-700" v-text="ticket.nombre"></span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                            <a :href="'mailto:' + ticket.email" class="text-blue-600 hover:underline" v-text="ticket.email"></a>
+                                        </div>
+                                        <div v-if="ticket.telefono" class="flex items-center space-x-2">
+                                            <i class="fas fa-phone text-gray-400"></i>
+                                            <a :href="'tel:' + ticket.telefono" class="text-blue-600 hover:underline" v-text="ticket.telefono"></a>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="ticket.empresa" class="mb-4 text-sm">
+                                        <span class="text-gray-500">Empresa:</span>
+                                        <span class="font-semibold text-gray-700 ml-2" v-text="ticket.empresa"></span>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded" v-text="ticket.categoria"></span>
+                                    </div>
+
+                                    <div class="flex space-x-2">
+                                        <button v-if="ticket.estado === 'pendiente'"
+                                                @click="cambiarEstadoTicket(ticket.id, 'en_proceso')"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                            <i class="fas fa-play mr-2"></i>En Proceso
+                                        </button>
+                                        <button v-if="ticket.estado !== 'resuelto'"
+                                                @click="cambiarEstadoTicket(ticket.id, 'resuelto')"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                            <i class="fas fa-check mr-2"></i>Resolver
+                                        </button>
+                                        <a :href="'mailto:' + ticket.email + '?subject=Re: ' + ticket.asunto"
+                                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                            <i class="fas fa-reply mr-2"></i>Responder
+                                        </a>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tab Demos -->
+                    <div v-show="tabActivo === 'demos'" class="animate-slide-in">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Solicitudes de Demostración</h2>
+                            <div class="flex space-x-3">
+                                <select v-model="filtroDemos" 
+                                        class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="todos">Todos</option>
+                                    <option value="pendiente">Pendientes</option>
+                                    <option value="contactado">Contactados</option>
+                                    <option value="agendado">Agendados</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div v-if="demosFiltradas.length === 0" 
+                             class="text-center py-12 text-gray-400">
+                            <i class="fas fa-calendar-times text-6xl mb-4"></i>
+                            <p class="text-xl">No hay solicitudes de demo</p>
+                        </div>
+
+                        <div v-else class="grid md:grid-cols-2 gap-4">
+                            <template v-for="demo in demosFiltradas" :key="demo.id">
+                                <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-5 border-2 border-green-200 hover:shadow-lg transition">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">
+                                                DEMO #<span v-text="demo.id"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs text-gray-500" v-text="formatearFecha(demo.created_at)"></span>
+                                    </div>
+
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2" v-text="demo.nombre"></h3>
+                                    
+                                    <div class="space-y-2 text-sm mb-4">
+                                        <div v-if="demo.empresa" class="flex items-center space-x-2">
+                                            <i class="fas fa-building text-gray-400"></i>
+                                            <span class="font-semibold text-gray-700" v-text="demo.empresa"></span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                            <a :href="'mailto:' + demo.email" class="text-blue-600 hover:underline" v-text="demo.email"></a>
+                                        </div>
+                                        <div v-if="demo.telefono" class="flex items-center space-x-2">
+                                            <i class="fab fa-whatsapp text-green-500"></i>
+                                            <a :href="'https://wa.me/' + demo.telefono.replace(/\D/g,'')" 
+                                               target="_blank"
+                                               class="text-green-600 hover:underline"
+                                               v-text="demo.telefono">
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3 mb-4 text-xs">
+                                        <div class="bg-white rounded p-2">
+                                            <span class="text-gray-500">Plan:</span>
+                                            <p class="font-semibold text-gray-800" v-text="formatearPlan(demo.plan_interes)"></p>
+                                        </div>
+                                        <div class="bg-white rounded p-2">
+                                            <span class="text-gray-500">Usuarios:</span>
+                                            <p class="font-semibold text-gray-800" v-text="demo.usuarios_estimados"></p>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="demo.mensaje" class="bg-white rounded p-3 text-sm text-gray-600 mb-4">
+                                        <i class="fas fa-comment-alt text-gray-400 mr-2"></i>
+                                        <span v-text="demo.mensaje"></span>
+                                    </div>
+
+                                    <div class="flex space-x-2">
+                                        <a :href="'https://wa.me/' + demo.telefono.replace(/\D/g,'') + '?text=Hola ' + demo.nombre + ', gracias por tu interés en Mejoramiso'" 
+                                           target="_blank"
+                                           class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm text-center transition">
+                                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                                        </a>
+                                        <a :href="'mailto:' + demo.email + '?subject=Demo Mejoramiso'"
+                                           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm text-center transition">
+                                            <i class="fas fa-envelope mr-2"></i>Email
+                                        </a>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tab Estadísticas -->
+                    <div v-show="tabActivo === 'estadisticas'" class="animate-slide-in">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Análisis y Métricas</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Gráfico de conversaciones -->
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                                    Conversaciones (7 días)
+                                </h3>
+                                <canvas ref="chartConversaciones"></canvas>
+                            </div>
+
+                            <!-- Tickets por categoría -->
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+                                    Tickets por Categoría
+                                </h3>
+                                <canvas ref="chartCategorias"></canvas>
+                            </div>
+
+                            <!-- Intenciones comunes -->
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
+                                    Intenciones Más Comunes
+                                </h3>
+                                <div class="space-y-3">
+                                    <template v-for="(intencion, index) in estadisticas.intenciones_comunes.slice(0, 5)" :key="index">
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <span class="text-gray-700" v-text="intencion.intenciones"></span>
+                                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold" v-text="intencion.total"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Prioridades -->
+                            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-flag text-red-600 mr-2"></i>
+                                    Tickets por Prioridad
+                                </h3>
+                                <canvas ref="chartPrioridades"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    cargando: false,
+                    tabActivo: 'tickets',
+                    filtroTickets: 'todos',
+                    filtroDemos: 'todos',
+                    
+                    stats: {
+                        totalTickets: {{ total_tickets }},
+                        ticketsPendientes: {{ tickets_pendientes }},
+                        demosPendientes: {{ demos_pendientes }},
+                        conversacionesHoy: {{ conversaciones_hoy }}
+                    },
+                    
+                    tickets: {{ tickets | tojson | safe }},
+                    demos: {{ demos | tojson | safe }},
+                    estadisticas: {
+                        por_categoria: [],
+                        por_prioridad: [],
+                        intenciones_comunes: [],
+                        conversaciones_diarias: []
+                    },
+                    
+                    charts: {}
+                }
+            },
+            
+            computed: {
+                tabs() {
+                    return [
+                        { id: 'tickets', nombre: 'Tickets', icon: 'fas fa-ticket-alt', badge: this.stats.ticketsPendientes },
+                        { id: 'demos', nombre: 'Demos', icon: 'fas fa-calendar-check', badge: this.stats.demosPendientes },
+                        { id: 'estadisticas', nombre: 'Estadísticas', icon: 'fas fa-chart-bar' }
+                    ];
+                },
+                
+                ticketsFiltrados() {
+                    if (this.filtroTickets === 'todos') {
+                        return this.tickets;
+                    }
+                    return this.tickets.filter(t => t.estado === this.filtroTickets);
+                },
+                
+                demosFiltradas() {
+                    if (this.filtroDemos === 'todos') {
+                        return this.demos;
+                    }
+                    return this.demos.filter(d => d.estado === this.filtroDemos);
+                }
+            },
+            
+            methods: {
+                async cargarDatos() {
+                    this.cargando = true;
+                    try {
+                        const response = await fetch('/api/stats');
+                        const data = await response.json();
+                        this.estadisticas = data;
+                        
+                        this.$nextTick(() => {
+                            this.actualizarGraficos();
+                        });
+                    } catch (error) {
+                        console.error('Error al cargar estadísticas:', error);
+                    } finally {
+                        this.cargando = false;
+                    }
+                },
+                
+                async cambiarEstadoTicket(ticketId, nuevoEstado) {
+                    try {
+                        const response = await fetch(`/api/tickets/${ticketId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ estado: nuevoEstado })
+                        });
+                        
+                        if (response.ok) {
+                            const ticket = this.tickets.find(t => t.id === ticketId);
+                            if (ticket) {
+                                ticket.estado = nuevoEstado;
+                            }
+                            
+                            if (nuevoEstado !== 'pendiente') {
+                                this.stats.ticketsPendientes--;
+                            }
+                            
+                            alert('Estado actualizado correctamente');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al actualizar estado');
+                    }
+                },
+                
+                formatearFecha(fecha) {
+                    return new Date(fecha).toLocaleDateString('es-CO', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+                
+                formatearEstado(estado) {
+                    const estados = {
+                        'pendiente': 'Pendiente',
+                        'en_proceso': 'En Proceso',
+                        'resuelto': 'Resuelto',
+                        'cerrado': 'Cerrado',
+                        'contactado': 'Contactado',
+                        'agendado': 'Agendado'
+                    };
+                    return estados[estado] || estado;
+                },
+                
+                formatearPlan(plan) {
+                    const planes = {
+                        'emprendedor': 'Emprendedor',
+                        'estandarpyme': 'EstándarPyme',
+                        'profesional': 'Profesional',
+                        'no_especificado': 'Sin especificar'
+                    };
+                    return planes[plan] || plan;
+                },
+                
+                getBadgeClass(prioridad) {
+                    const classes = {
+                        'urgente': 'bg-red-100 text-red-800',
+                        'alta': 'bg-orange-100 text-orange-800',
+                        'normal': 'bg-blue-100 text-blue-800'
+                    };
+                    return classes[prioridad] || classes.normal;
+                },
+                
+                getEstadoBadgeClass(estado) {
+                    const classes = {
+                        'pendiente': 'bg-yellow-100 text-yellow-800',
+                        'en_proceso': 'bg-blue-100 text-blue-800',
+                        'resuelto': 'bg-green-100 text-green-800',
+                        'cerrado': 'bg-gray-100 text-gray-800'
+                    };
+                    return classes[estado] || classes.pendiente;
+                },
+                
+                actualizarGraficos() {
+                    this.crearGraficoConversaciones();
+                    this.crearGraficoCategorias();
+                    this.crearGraficoPrioridades();
+                },
+                
+                crearGraficoConversaciones() {
+                    const ctx = this.$refs.chartConversaciones;
+                    if (!ctx) return;
+                    
+                    if (this.charts.conversaciones) {
+                        this.charts.conversaciones.destroy();
+                    }
+                    
+                    const datos = this.estadisticas.conversaciones_diarias || [];
+                    
+                    this.charts.conversaciones = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: datos.map(d => new Date(d.fecha).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })),
+                            datasets: [{
+                                label: 'Conversaciones',
+                                data: datos.map(d => d.total),
+                                borderColor: 'rgb(59, 130, 246)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                },
+                
+                crearGraficoCategorias() {
+                    const ctx = this.$refs.chartCategorias;
+                    if (!ctx) return;
+                    
+                    if (this.charts.categorias) {
+                        this.charts.categorias.destroy();
+                    }
+                    
+                    const datos = this.estadisticas.por_categoria || [];
+                    
+                    this.charts.categorias = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: datos.map(d => d.categoria),
+                            datasets: [{
+                                data: datos.map(d => d.total),
+                                backgroundColor: [
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(16, 185, 129, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(168, 85, 247, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true
+                        }
+                    });
+                },
+                
+                crearGraficoPrioridades() {
+                    const ctx = this.$refs.chartPrioridades;
+                    if (!ctx) return;
+                    
+                    if (this.charts.prioridades) {
+                        this.charts.prioridades.destroy();
+                    }
+                    
+                    const datos = this.estadisticas.por_prioridad || [];
+                    
+                    this.charts.prioridades = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: datos.map(d => d.prioridad.toUpperCase()),
+                            datasets: [{
+                                label: 'Tickets',
+                                data: datos.map(d => d.total),
+                                backgroundColor: [
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)',
+                                    'rgba(59, 130, 246, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            },
+            
+            mounted() {
+                this.cargarDatos();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

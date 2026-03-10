@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miso - Asistente Virtual Mejoramiso®</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+        
+        .gradient-primary { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
+        .gradient-secondary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        
+        .quick-btn {
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" v-cloak>
+        <!-- Header -->
+        <header class="gradient-primary text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://web.mejoramiso.com/wp-content/uploads/2024/04/LOGO-MEJORAMISO-1.jpg" 
+                             alt="Mejoramiso" 
+                             class="h-10 bg-white rounded px-2">
+                        <div>
+                            <h1 class="text-xl font-bold">Miso 🤖</h1>
+                            <p class="text-sm text-blue-100">Tu Asistente Virtual Inteligente</p>
+                        </div>
+                    </div>
+                    <a href="/dashboard" 
+                       class="hidden md:flex items-center space-x-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid lg:grid-cols-3 gap-6">
+                
+                <!-- Sección de Información (Izquierda) -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Bienvenida -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 gradient-primary rounded-full flex items-center justify-center text-white text-xl">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">¡Hola! Soy Miso</h2>
+                                <p class="text-sm text-gray-600">Asistente de Mejoramiso®</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed">
+                            Estoy aquí para ayudarte con información sobre nuestros módulos, 
+                            planes, y cómo Mejoramiso® puede transformar tu sistema de gestión 
+                            empresarial con Mejoramiento Continuo.
+                        </p>
+                    </div>
+
+                    <!-- Servicios Destacados -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                            Servicios Principales
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition cursor-pointer" @click="enviarMensajeRapido('¿Qué sistemas de gestión soportan?')">
+                                <div class="flex items-start space-x-3">
+                                    <span class="text-2xl">📋</span>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm">Sistemas de Gestión</h4>
+                                        <p class="text-xs text-gray-600">ISO 9001, 14001, 31000, 27001</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition cursor-pointer" @click="enviarMensajeRapido('¿Qué módulos tienen disponibles?')">
+                                <div class="flex items-start space-x-3">
+                                    <span class="text-2xl">🔧</span>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm">Módulos</h4>
+                                        <p class="text-xs text-gray-600">19 módulos especializados</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition cursor-pointer" @click="enviarMensajeRapido('¿Cuáles son los planes y precios?')">
+                                <div class="flex items-start space-x-3">
+                                    <span class="text-2xl">💼</span>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm">Planes</h4>
+                                        <p class="text-xs text-gray-600">Emprendedor, Pyme, Profesional</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition cursor-pointer" @click="enviarMensajeRapido('Necesito información sobre SG-SST')">
+                                <div class="flex items-start space-x-3">
+                                    <span class="text-2xl">🎯</span>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm">SG-SST</h4>
+                                        <p class="text-xs text-gray-600">Decreto 1072 Colombia</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition cursor-pointer" @click="enviarMensajeRapido('¿Cómo funciona el mejoramiento continuo?')">
+                                <div class="flex items-start space-x-3">
+                                    <span class="text-2xl">📊</span>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm">Mejoramiento</h4>
+                                        <p class="text-xs text-gray-600">Metodología PHVA</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Planes -->
+                    <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-lg p-6 border border-green-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-box text-green-600 mr-2"></i>
+                            Planes Disponibles
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Emprendedor</h4>
+                                        <p class="text-xs text-gray-600">Hasta 10 usuarios</p>
+                                    </div>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">5 módulos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">EstándarPyme</h4>
+                                        <p class="text-xs text-gray-600">Hasta 30 usuarios</p>
+                                    </div>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">10 módulos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Profesional</h4>
+                                        <p class="text-xs text-gray-600">Usuarios ilimitados</p>
+                                    </div>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">19 módulos</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button @click="enviarMensajeRapido('¿Cuál plan me recomiendas?')"
+                                class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition">
+                            <i class="fas fa-question-circle mr-2"></i>
+                            ¿Cuál plan es para mí?
+                        </button>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">📞 Contacto</h3>
+                        <div class="space-y-3 text-sm">
+                            <a href="https://wa.me/573186072127" 
+                               target="_blank"
+                               class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                                <i class="fab fa-whatsapp text-green-600 text-xl"></i>
+                                <span class="text-gray-700">+57 318 6072127</span>
+                            </a>
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <i class="fas fa-map-marker-alt text-red-600 text-xl"></i>
+                                <span class="text-gray-700">Medellín, Colombia</span>
+                            </div>
+                            <a href="https://web.mejoramiso.com" 
+                               target="_blank"
+                               class="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+                                <i class="fas fa-globe text-blue-600 text-xl"></i>
+                                <span class="text-gray-700">web.mejoramiso.com</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat (Derecha) -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-xl h-[calc(100vh-200px)] flex flex-col">
+                        
+                        <!-- Chat Header -->
+                        <div class="gradient-primary text-white p-4 rounded-t-xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">Chat con Miso</h3>
+                                        <p class="text-xs text-blue-100">
+                                            <span class="animate-pulse-slow">●</span> En línea
+                                        </p>
+                                    </div>
+                                </div>
+                                <button @click="limpiarChat" 
+                                        class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm transition">
+                                    <i class="fas fa-redo mr-1"></i> Reiniciar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción Rápida -->
+                        <div class="p-4 bg-gray-50 border-b overflow-x-auto">
+                            <div class="flex space-x-2 min-w-max">
+                                <button @click="enviarMensajeRapido('¿Qué módulos tienen?')"
+                                        class="quick-btn bg-white border border-gray-300 hover:border-blue-500 px-4 py-2 rounded-full text-sm whitespace-nowrap">
+                                    🔧 Módulos
+                                </button>
+                                <button @click="enviarMensajeRapido('¿Cuánto cuesta?')"
+                                        class="quick-btn bg-white border border-gray-300 hover:border-blue-500 px-4 py-2 rounded-full text-sm whitespace-nowrap">
+                                    💰 Precios
+                                </button>
+                                <button @click="enviarMensajeRapido('Quiero ver una demo')"
+                                        class="quick-btn bg-white border border-gray-300 hover:border-blue-500 px-4 py-2 rounded-full text-sm whitespace-nowrap">
+                                    🎯 Demo
+                                </button>
+                                <button @click="enviarMensajeRapido('¿Cómo los contacto?')"
+                                        class="quick-btn bg-white border border-gray-300 hover:border-blue-500 px-4 py-2 rounded-full text-sm whitespace-nowrap">
+                                    📞 Contacto
+                                </button>
+                                <button @click="enviarMensajeRapido('Información sobre ISO 9001')"
+                                        class="quick-btn bg-white border border-gray-300 hover:border-blue-500 px-4 py-2 rounded-full text-sm whitespace-nowrap">
+                                    🏭 ISO
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mensajes -->
+                        <div ref="mensajesContainer" 
+                             class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                            
+                            <template v-for="(mensaje, index) in mensajes" :key="index">
+                                <div :class="mensaje.tipo === 'usuario' ? 'flex justify-end' : 'flex justify-start'"
+                                     class="animate-slide-in">
+                                    
+                                    <!-- Mensaje del Bot -->
+                                    <template v-if="mensaje.tipo === 'bot'">
+                                        <div class="flex space-x-3 max-w-3xl">
+                                            <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                                <i class="fas fa-robot text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
+                                                    <p class="text-gray-800 leading-relaxed" v-html="formatearMensaje(mensaje.texto)"></p>
+                                                </div>
+                                                <p class="text-xs text-gray-400 mt-1 ml-2" v-text="mensaje.hora"></p>
+                                                
+                                                <!-- Sugerencias -->
+                                                <template v-if="mensaje.sugerencias && mensaje.sugerencias.length">
+                                                    <div class="mt-3 space-y-2">
+                                                        <div v-for="(sugerencia, i) in mensaje.sugerencias" 
+                                                             :key="i"
+                                                             class="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm text-blue-800">
+                                                            <i class="fas fa-lightbulb mr-2"></i><span v-text="sugerencia"></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Botones de acción -->
+                                                <template v-if="mensaje.mostrarAcciones">
+                                                    <div class="mt-3 flex flex-wrap gap-2">
+                                                        <button v-if="mensaje.needsDemo"
+                                                                @click="abrirModalDemo"
+                                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                                            <i class="fas fa-calendar-alt mr-2"></i>Agendar Demo
+                                                        </button>
+                                                        <button v-if="mensaje.needsTicket"
+                                                                @click="abrirModalTicket"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                                            <i class="fas fa-ticket-alt mr-2"></i>Crear Ticket
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Mensaje del Usuario -->
+                                    <template v-else>
+                                        <div class="max-w-md">
+                                            <div class="bg-blue-600 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-sm">
+                                                <p class="leading-relaxed" v-text="mensaje.texto"></p>
+                                            </div>
+                                            <p class="text-xs text-gray-400 mt-1 mr-2 text-right" v-text="mensaje.hora"></p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Indicador de escritura -->
+                            <template v-if="escribiendo">
+                                <div class="flex space-x-3 animate-slide-in">
+                                    <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-robot text-sm"></i>
+                                    </div>
+                                    <div class="bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3">
+                                        <div class="flex space-x-2">
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="p-4 bg-white border-t rounded-b-xl">
+                            <form @submit.prevent="enviarMensaje" class="flex space-x-3">
+                                <input v-model="mensajeActual"
+                                       type="text"
+                                       placeholder="Escribe tu consulta sobre Mejoramiso..."
+                                       :disabled="escribiendo"
+                                       class="flex-1 border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                       autocomplete="off">
+                                <button type="submit"
+                                        :disabled="!mensajeActual.trim() || escribiendo"
+                                        class="gradient-primary text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                            <p class="text-xs text-gray-400 text-center mt-2">
+                                <i class="fas fa-shield-alt mr-1"></i>
+                                Powered by IA • Mejoramiso® - IMPROSOFT S.A.S
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Demo -->
+        <template v-if="modalDemo">
+            <div @click.self="cerrarModalDemo"
+                 class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-slide-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-calendar-check text-green-600 mr-2"></i>
+                            Solicitar Demo
+                        </h3>
+                        <button @click="cerrarModalDemo" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-gray-600 mb-6">
+                        Agenda una demostración personalizada de Mejoramiso® con nuestro equipo comercial.
+                    </p>
+
+                    <form @submit.prevent="enviarSolicitudDemo" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo *</label>
+                            <input v-model="formDemo.nombre" 
+                                   type="text" 
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                            <input v-model="formDemo.email" 
+                                   type="email" 
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Empresa</label>
+                            <input v-model="formDemo.empresa" 
+                                   type="text"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Teléfono/WhatsApp</label>
+                            <input v-model="formDemo.telefono" 
+                                   type="tel"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Plan de Interés</label>
+                            <select v-model="formDemo.plan_interes"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="no_especificado">No estoy seguro</option>
+                                <option value="emprendedor">Emprendedor (10 usuarios)</option>
+                                <option value="estandarpyme">EstándarPyme (30 usuarios)</option>
+                                <option value="profesional">Profesional (Ilimitado)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Usuarios Estimados</label>
+                            <input v-model.number="formDemo.usuarios_estimados" 
+                                   type="number"
+                                   min="1"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Mensaje (opcional)</label>
+                            <textarea v-model="formDemo.mensaje"
+                                      rows="3"
+                                      class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button"
+                                    @click="cerrarModalDemo"
+                                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold transition">
+                                Cancelar
+                            </button>
+                            <button type="submit"
+                                    :disabled="enviandoDemo"
+                                    class="flex-1 gradient-secondary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50">
+                                    <template v-if="!enviandoDemo">
+                                        <i class="fas fa-check mr-2"></i>Solicitar
+                                    </template>
+                                    <template v-else>
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Enviando...
+                                    </template>
+                            </button>
+                        </div>
+
+                        <template v-if="mensajeDemo">
+                            <div :class="mensajeDemo.tipo === 'exito' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                                 class="p-4 rounded-lg border text-sm" v-text="mensajeDemo.texto">
+                            </div>
+                        </template>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- Modal Ticket -->
+        <template v-if="modalTicket">
+            <div @click.self="cerrarModalTicket"
+                 class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-slide-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-ticket-alt text-blue-600 mr-2"></i>
+                            Crear Ticket
+                        </h3>
+                        <button @click="cerrarModalTicket" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-gray-600 mb-6">
+                        Nuestro equipo de soporte te contactará pronto para resolver tu consulta.
+                    </p>
+
+                    <form @submit.prevent="enviarTicket" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo *</label>
+                            <input v-model="formTicket.nombre" 
+                                   type="text" 
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                            <input v-model="formTicket.email" 
+                                   type="email" 
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Empresa</label>
+                            <input v-model="formTicket.empresa" 
+                                   type="text"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
+                            <input v-model="formTicket.telefono" 
+                                   type="tel"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Asunto *</label>
+                            <input v-model="formTicket.asunto" 
+                                   type="text" 
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
+                            <textarea v-model="formTicket.descripcion"
+                                      required
+                                      rows="4"
+                                      class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button"
+                                    @click="cerrarModalTicket"
+                                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold transition">
+                                Cancelar
+                            </button>
+                            <button type="submit"
+                                    :disabled="enviandoTicket"
+                                    class="flex-1 gradient-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50">
+                                    <template v-if="!enviandoTicket">
+                                        <i class="fas fa-paper-plane mr-2"></i>Enviar
+                                    </template>
+                                    <template v-else>
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Enviando...
+                                    </template>
+                            </button>
+                        </div>
+
+                        <template v-if="mensajeTicket">
+                            <div :class="mensajeTicket.tipo === 'exito' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                                 class="p-4 rounded-lg border text-sm" v-text="mensajeTicket.texto">
+                            </div>
+                        </template>
+                    </form>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    mensajes: [
+                        {
+                            tipo: 'bot',
+                            texto: '¡Hola! 👋 Soy Miso, tu asistente virtual de Mejoramiso®. Estoy aquí para ayudarte con información sobre nuestros módulos, planes y cómo podemos optimizar tu sistema de gestión empresarial. ¿En qué puedo ayudarte hoy?',
+                            hora: this.obtenerHora(),
+                            sugerencias: [],
+                            mostrarAcciones: false
+                        }
+                    ],
+                    mensajeActual: '',
+                    escribiendo: false,
+                    historial: [],
+                    
+                    // Modals
+                    modalDemo: false,
+                    modalTicket: false,
+                    
+                    // Forms
+                    formDemo: {
+                        nombre: '',
+                        email: '',
+                        empresa: '',
+                        telefono: '',
+                        plan_interes: 'no_especificado',
+                        usuarios_estimados: 10,
+                        mensaje: ''
+                    },
+                    formTicket: {
+                        nombre: '',
+                        email: '',
+                        empresa: '',
+                        telefono: '',
+                        asunto: '',
+                        descripcion: ''
+                    },
+                    
+                    // Estados
+                    enviandoDemo: false,
+                    enviandoTicket: false,
+                    mensajeDemo: null,
+                    mensajeTicket: null
+                }
+            },
+            
+            methods: {
+                async enviarMensaje() {
+                    if (!this.mensajeActual.trim()) return;
+                    
+                    const textoUsuario = this.mensajeActual.trim();
+                    this.mensajeActual = '';
+                    
+                    this.mensajes.push({
+                        tipo: 'usuario',
+                        texto: textoUsuario,
+                        hora: this.obtenerHora()
+                    });
+                    
+                    this.scrollToBottom();
+                    this.escribiendo = true;
+                    
+                    try {
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: textoUsuario,
+                                history: this.historial
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        this.historial.push(
+                            { role: 'user', content: textoUsuario },
+                            { role: 'assistant', content: data.response }
+                        );
+                        
+                        if (this.historial.length > 10) {
+                            this.historial = this.historial.slice(-10);
+                        }
+                        
+                        this.mensajes.push({
+                            tipo: 'bot',
+                            texto: data.response,
+                            hora: this.obtenerHora(),
+                            sugerencias: data.sugerencias || [],
+                            needsDemo: data.needs_demo,
+                            needsTicket: data.needs_ticket,
+                            mostrarAcciones: data.needs_demo || data.needs_ticket
+                        });
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.mensajes.push({
+                            tipo: 'bot',
+                            texto: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo o contáctanos directamente al WhatsApp +57 318 6072127.',
+                            hora: this.obtenerHora(),
+                            sugerencias: [],
+                            mostrarAcciones: false
+                        });
+                    } finally {
+                        this.escribiendo = false;
+                        this.scrollToBottom();
+                    }
+                },
+                
+                enviarMensajeRapido(mensaje) {
+                    this.mensajeActual = mensaje;
+                    this.enviarMensaje();
+                },
+                
+                async enviarSolicitudDemo() {
+                    this.enviandoDemo = true;
+                    this.mensajeDemo = null;
+                    
+                    try {
+                        const response = await fetch('/api/demo', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.formDemo)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.mensajeDemo = {
+                                tipo: 'exito',
+                                texto: data.message
+                            };
+                            setTimeout(() => {
+                                this.cerrarModalDemo();
+                                this.resetFormDemo();
+                            }, 2000);
+                        } else {
+                            this.mensajeDemo = {
+                                tipo: 'error',
+                                texto: data.error || 'Error al enviar solicitud'
+                            };
+                        }
+                    } catch (error) {
+                        this.mensajeDemo = {
+                            tipo: 'error',
+                            texto: 'Error de conexión. Intenta de nuevo.'
+                        };
+                    } finally {
+                        this.enviandoDemo = false;
+                    }
+                },
+                
+                async enviarTicket() {
+                    this.enviandoTicket = true;
+                    this.mensajeTicket = null;
+                    
+                    try {
+                        const response = await fetch('/api/tickets', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.formTicket)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.mensajeTicket = {
+                                tipo: 'exito',
+                                texto: data.message
+                            };
+                            setTimeout(() => {
+                                this.cerrarModalTicket();
+                                this.resetFormTicket();
+                            }, 2000);
+                        } else {
+                            this.mensajeTicket = {
+                                tipo: 'error',
+                                texto: data.error || 'Error al crear ticket'
+                            };
+                        }
+                    } catch (error) {
+                        this.mensajeTicket = {
+                            tipo: 'error',
+                            texto: 'Error de conexión. Intenta de nuevo.'
+                        };
+                    } finally {
+                        this.enviandoTicket = false;
+                    }
+                },
+                
+                abrirModalDemo() {
+                    this.modalDemo = true;
+                    this.mensajeDemo = null;
+                },
+                
+                cerrarModalDemo() {
+                    this.modalDemo = false;
+                },
+                
+                abrirModalTicket() {
+                    this.modalTicket = true;
+                    this.mensajeTicket = null;
+                },
+                
+                cerrarModalTicket() {
+                    this.modalTicket = false;
+                },
+                
+                resetFormDemo() {
+                    this.formDemo = {
+                        nombre: '',
+                        email: '',
+                        empresa: '',
+                        telefono: '',
+                        plan_interes: 'no_especificado',
+                        usuarios_estimados: 10,
+                        mensaje: ''
+                    };
+                },
+                
+                resetFormTicket() {
+                    this.formTicket = {
+                        nombre: '',
+                        email: '',
+                        empresa: '',
+                        telefono: '',
+                        asunto: '',
+                        descripcion: ''
+                    };
+                },
+                
+                limpiarChat() {
+                    if (confirm('¿Deseas reiniciar la conversación?')) {
+                        this.mensajes = [
+                            {
+                                tipo: 'bot',
+                                texto: '¡Hola de nuevo! 👋 ¿En qué puedo ayudarte?',
+                                hora: this.obtenerHora(),
+                                sugerencias: [],
+                                mostrarAcciones: false
+                            }
+                        ];
+                        this.historial = [];
+                        this.scrollToBottom();
+                    }
+                },
+                
+                formatearMensaje(texto) {
+                    texto = texto.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 underline">$1</a>');
+                    texto = texto.replace(/\n/g, '<br>');
+                    texto = texto.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    return texto;
+                },
+                
+                obtenerHora() {
+                    return new Date().toLocaleTimeString('es-CO', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                },
+                
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        const container = this.$refs.mensajesContainer;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
+                }
+            },
+            
+            mounted() {
+                this.scrollToBottom();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

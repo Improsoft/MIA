@@ -902,76 +902,33 @@ def no_encontrado(e):
 
 
 # =============================================================================
-# INICIALIZACION Y EJECUCION
-# =============================================================================
-
-# =============================================================================
-# MODIFICACIONES PARA PRODUCCIÓN EN IIS
-# Agrega esto al FINAL de tu app.py (reemplaza el if __name__ == '__main__')
+# REEMPLAZAR EL BLOQUE "if __name__ == '__main__':" AL FINAL DE app.py
 # =============================================================================
 
 if __name__ == '__main__':
     # Inicializar base de datos
     init_db()
     
-    # Mensajes informativos
-    print("\n" + "="*70)
-    print("🤖 ASISTENTE VIRTUAL MISO - MEJORAMISO® (IMPROSOFT S.A.S)")
-    print("="*70)
-    
-    # Detectar si estamos en IIS (producción) o desarrollo
+    # Detectar entorno
     import os
-    if os.environ.get('WEBSITE_SITE_NAME'):
-        # Estamos en IIS/Azure
-        print("🌐 Modo: PRODUCCIÓN (IIS)")
-        print(f"📊 Base de datos: {os.path.abspath('mejoramiso_db.db')}")
-        print(f"🤖 Estado IA: {'✅ Configurada' if GROQ_API_KEY else '❌ NO CONFIGURADA'}")
-        
-        if not GROQ_API_KEY:
-            print("\n⚠️  ADVERTENCIA: GROQ_API_KEY no configurada")
-            print("   Configura la variable de entorno en IIS")
-        
-        print("="*70 + "\n")
-        
-        # En producción, Flask se ejecuta vía FastCGI/WSGI
-        # No usar app.run()
-    else:
-        # Modo desarrollo local
-        print(f"🌐 Servidor iniciando en: http://localhost:5000")
-        print(f"📊 Dashboard disponible en: http://localhost:5000/dashboard")
-        print(f"🤖 Estado IA: {'✅ Configurada' if GROQ_API_KEY else '❌ NO CONFIGURADA'}")
-        print(f"📧 Contacto: WhatsApp +57 318 6072127")
-        print(f"🏢 Sede: Medellín, Colombia")
-        
-        if not GROQ_API_KEY:
-            print("\n⚠️  ADVERTENCIA: Variable GROQ_API_KEY no encontrada en .env")
-            print("   El chatbot funcionará en modo limitado sin IA")
-        
-        print("="*70 + "\n")
-        
-        # Iniciar servidor Flask en desarrollo
-        app.run(debug=True, host='0.0.0.0', port=5000)
-
-# Para IIS, el objeto 'app' debe estar disponible globalmente
-# IIS buscará automáticamente el objeto 'app' en este archivo
-    # Inicializar BD
-    init_db()
+    PORT = int(os.environ.get('PORT', 5000))
     
-    # Mensajes informativos
     print("\n" + "="*70)
     print("🤖 ASISTENTE VIRTUAL MISO - MEJORAMISO® (IMPROSOFT S.A.S)")
     print("="*70)
-    print(f"🌐 Servidor iniciando en: http://localhost:5000")
-    print(f"📊 Dashboard disponible en: http://localhost:5000/dashboard")
+    print(f"🌐 Puerto: {PORT}")
     print(f"🤖 Estado IA: {'✅ Configurada' if GROQ_API_KEY else '❌ NO CONFIGURADA'}")
-    print(f"📧 Contacto: WhatsApp +57 318 6072127")
-    print(f"🏢 Sede: Medellín, Colombia")
     
     if not GROQ_API_KEY:
-        print("\n⚠️  ADVERTENCIA: Variable GROQ_API_KEY no encontrada en .env")
-        print("   El chatbot funcionará en modo limitado sin IA")
+        print("\n⚠️  ADVERTENCIA: GROQ_API_KEY no configurada")
     
     print("="*70 + "\n")
     
-    # Iniciar servidor
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Modo desarrollo o producción
+    DEBUG = os.environ.get('FLASK_ENV') != 'production'
+    
+    app.run(
+        host='0.0.0.0',
+        port=PORT,
+        debug=DEBUG
+    )
